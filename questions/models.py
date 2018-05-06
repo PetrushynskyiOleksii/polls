@@ -33,7 +33,9 @@ class Answer(models.Model):
         verbose_name_plural = 'Answers'
 
     question = models.ForeignKey(Question,
-                                 verbose_name='Question')
+                                 verbose_name='Question',
+                                 related_name='answers',
+                                 on_delete=models.CASCADE)
     answer = models.CharField(verbose_name='Answer',
                               blank=True,
                               max_length=255)
