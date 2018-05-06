@@ -44,4 +44,4 @@ class Answer(models.Model):
 
     def __str__(self):
         """Render the answer instance as a string."""
-        return ('%s - %d times') % (self.answer, self.votes_count)
+        return ('%s (%d)') % (self.answer, self.votes_count)
