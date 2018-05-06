@@ -1,6 +1,6 @@
 """Models of questions' app."""
 
-from django.db import models  # noqa: F401
+from django.db import models
 
 
 class Question(models.Model):
