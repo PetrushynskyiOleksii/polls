@@ -1,8 +1,8 @@
 """Views for questions' app."""
 
-from rest_framework.generics import ListCreateAPIView
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.generics import (ListCreateAPIView,
+                                     RetrieveUpdateDestroyAPIView
+                                     )
 
 from .models import Question
 from .serializers import QuestionSerializer
@@ -12,18 +12,11 @@ class ListCreateQuestion(ListCreateAPIView):
     """Create questions or show all existing questions."""
 
     queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
 
-    def list(self, request):
-        """Represent all questions."""
-        queryset = self.get_queryset()
-        serializer = QuestionSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        """Create question."""
-        data = request.data
-        serializer = QuestionSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+class QuestionRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
+    """Retrive, update, destroy api of question object."""
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    serializer_class = QuestionSerializer
+    queryset = Question.objects.all()

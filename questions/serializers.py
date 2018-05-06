@@ -9,12 +9,13 @@ class AnswerSerializer(serializers.ModelSerializer):
     """Serialize answer model."""
 
     votes_count = serializers.ReadOnlyField()
+    id = serializers.ReadOnlyField()
 
     class Meta(object):
         """Meta settings for AnswerSerializer."""
 
         model = Answer
-        fields = ('answer', 'votes_count')
+        fields = ('id', 'answer', 'votes_count')
 
     def create(self, validated_data):
         """Create answer."""
@@ -41,3 +42,20 @@ class QuestionSerializer(serializers.ModelSerializer):
             Answer.objects.create(question=question, **answer_data)
 
         return question
+
+    def update(self, instance, validated_data):
+        """Update question."""
+        instance.question = validated_data.get('question', instance.question)
+        instance.save()
+
+        answers = validated_data.get('answers')
+
+        for answer in answers:
+            ans = Answer.objects.filter(answer=answer, question=instance).first()
+            if ans:
+                ans.answer = answer.get('answer', ans.name)
+                ans.save()
+            else:
+                Answer.objects.create(question=instance, **answer)
+
+        return instance
