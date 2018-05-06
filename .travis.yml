@@ -11,3 +11,4 @@ before_install:
 
 script:
 - pre-commit run --all-files
+- python ./manage.py test
