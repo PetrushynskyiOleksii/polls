@@ -13,7 +13,6 @@ class Question(models.Model):
         verbose_name_plural = 'Questions'
 
     question = models.CharField(verbose_name='Question',
-                                blank=True,
                                 max_length=255)
     total_votes = models.IntegerField(verbose_name='Total Votes',
                                       default=0)

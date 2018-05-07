@@ -59,3 +59,9 @@ class QuestionSerializer(serializers.ModelSerializer):
                 Answer.objects.create(question=instance, **answer)
 
         return instance
+
+    def validate_answers(self, answers):
+        """Validate answers field before create question."""
+        if len(answers) < 2:
+            raise serializers.ValidationError('There are need to be more then 2 answers.')
+        return answers
