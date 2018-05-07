@@ -2,9 +2,10 @@
 
 import json
 
-from django.test import TestCase, Client
+from django.test import TestCase
 
 from rest_framework import status
+from rest_framework.test import APIClient
 
 from questions.models import Question, Answer
 
@@ -14,7 +15,7 @@ class QuestionListViewTest(TestCase):
 
     def setUp(self):
         """Pre-populate test data."""
-        self.client = Client()
+        self.client = APIClient()
         self.test_first_quest = Question.objects.create(question='test first question')
         self.test_second_quest = Question.objects.create(question='test second question',
                                                          total_votes=2)
@@ -52,7 +53,7 @@ class QuestionCRDViewTest(TestCase):
 
     def setUp(self):
         """Pre-populate test data."""
-        self.client = Client()
+        self.client = APIClient()
 
     def tearDown(self):
         """Clean-up test data."""
@@ -60,7 +61,12 @@ class QuestionCRDViewTest(TestCase):
 
     def test_question_create_delete_retrieve(self):
         """Test create question."""
-        data = {'question': 'test question'}
+        data = {'question': 'test question',
+                'answers': [
+                            {'answer': 'first answer'},
+                            {'answer': 'second answer'}
+                            ]
+                }
 
         # ----- Create -------
         response = self.client.post('/question/create/', data, format='json')
@@ -69,6 +75,10 @@ class QuestionCRDViewTest(TestCase):
         quest = Question.objects.get(question='test question')
         self.assertIsNotNone(quest)
         self.assertEqual(quest.total_votes, 0)
+
+        data.pop('answers')
+        response = self.client.post('/question/create/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # ----- Retrieve -----
         response = self.client.get('/question/{}/'.format(quest.id))
