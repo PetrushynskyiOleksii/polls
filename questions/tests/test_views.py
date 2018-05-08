@@ -94,6 +94,8 @@ class QuestionCRDViewTest(TestCase):
         response = self.client.get('/question/100/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+        # ----- Update -------
+
         # ----- Delete -------
         response = self.client.delete('/question/{}/'.format(quest.id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

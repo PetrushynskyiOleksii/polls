@@ -1,7 +1,7 @@
 """Views for questions' app."""
 
 from rest_framework.generics import (ListCreateAPIView,
-                                     RetrieveDestroyAPIView
+                                     RetrieveUpdateDestroyAPIView
                                      )
 
 from .models import Question
@@ -15,7 +15,7 @@ class ListCreateQuestion(ListCreateAPIView):
     serializer_class = QuestionSerializer
 
 
-class QuestionRetrieveDestroy(RetrieveDestroyAPIView):
+class QuestionRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
     """Retrive, destroy api of question object."""
 
     serializer_class = QuestionSerializer
