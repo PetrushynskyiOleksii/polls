@@ -48,20 +48,17 @@ class QuestionSerializer(serializers.ModelSerializer):
         instance.question = validated_data.get('question', instance.question)
         instance.save()
 
-        answers = validated_data.get('answers')
+        question = Question.objects.get(id=instance.id)
+        Answer.objects.filter(question=question).delete()
 
-        for answer in answers:
-            ans = Answer.objects.filter(answer=answer, question=instance).first()
-            if ans:
-                ans.answer = answer.get('answer', ans.name)
-                ans.save()
-            else:
-                Answer.objects.create(question=instance, **answer)
+        answers_data = validated_data.pop('answers')
+        for answer_data in answers_data:
+            Answer.objects.create(question=question, **answer_data)
 
         return instance
 
     def validate_answers(self, answers):
         """Validate answers field before create question."""
         if len(answers) < 2:
-            raise serializers.ValidationError('There are need to be more then 2 answers.')
+            raise serializers.ValidationError('Require more then 2 answers.')
         return answers
