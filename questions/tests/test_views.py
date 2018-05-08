@@ -76,6 +76,8 @@ class QuestionCRDViewTest(TestCase):
         self.assertIsNotNone(quest)
         self.assertEqual(quest.total_votes, 0)
         self.assertEqual(Answer.objects.filter(question=quest).count(), 2)
+        self.assertIsNotNone(Answer.objects.get(question=quest, answer='first answer'))
+        self.assertIsNotNone(Answer.objects.get(question=quest, answer='second answer'))
 
         data.pop('answers')
         response = self.client.post('/question/create/', data, format='json')
@@ -95,6 +97,31 @@ class QuestionCRDViewTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # ----- Update -------
+        data = {'question': 'test update question',
+                'answers': [
+                            {'answer': 'first update answer'},
+                            {'answer': 'second update answer'}
+                            ],
+                }
+
+        response = self.client.put('/question/{}/'.format(quest.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        quest = Question.objects.get(id=quest.id)
+        self.assertEqual(quest.question, 'test update question')
+        with self.assertRaises(Question.DoesNotExist):
+            Question.objects.get(question='test question')
+        self.assertIsNotNone(Answer.objects.get(question=quest, answer='first update answer'))
+        self.assertIsNotNone(Answer.objects.get(question=quest, answer='second update answer'))
+        with self.assertRaises(Answer.DoesNotExist):
+            Answer.objects.get(answer='first answer')
+            Answer.objects.get(answer='second answer')
+
+        response = self.client.put('/question/100/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        data.pop('answers')
+        response = self.client.put('/question/{}/'.format(quest.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # ----- Delete -------
         response = self.client.delete('/question/{}/'.format(quest.id))
