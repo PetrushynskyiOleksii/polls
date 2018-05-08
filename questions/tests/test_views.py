@@ -75,6 +75,7 @@ class QuestionCRDViewTest(TestCase):
         quest = Question.objects.get(question='test question')
         self.assertIsNotNone(quest)
         self.assertEqual(quest.total_votes, 0)
+        self.assertEqual(Answer.objects.filter(question=quest).count(), 2)
 
         data.pop('answers')
         response = self.client.post('/question/create/', data, format='json')
@@ -84,8 +85,11 @@ class QuestionCRDViewTest(TestCase):
         response = self.client.get('/question/{}/'.format(quest.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_json = json.dumps(response.data)
-        self.assertTrue(quest.question in response_json)
-        self.assertTrue(str(quest.total_votes) in response_json)
+        self.assertIn(quest.question, response_json)
+        self.assertIn(str(quest.total_votes), response_json)
+        for ans in Answer.objects.filter(question=quest):
+            self.assertIn(ans.answer, response_json)
+            self.assertIn(str(ans.votes_count), response_json)
 
         response = self.client.get('/question/100/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -95,6 +99,7 @@ class QuestionCRDViewTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(Question.DoesNotExist):
             Question.objects.get(id=quest.id)
+        self.assertEqual(len(Answer.objects.filter(question=quest)), 0)
 
         response = self.client.delete('question/100/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
