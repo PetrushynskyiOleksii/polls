@@ -1,6 +1,8 @@
 """Models of questions' app."""
 
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 
 class Question(models.Model):
@@ -44,3 +46,11 @@ class Answer(models.Model):
     def __str__(self):
         """Render the answer instance as a string."""
         return ('%s (%d)') % (self.answer, self.votes_count)
+
+
+@receiver(post_delete, sender=Answer)
+def update_total_votes(sender, instance, **kwargs):
+    """Subtract votes count of removed answer from total count of votes."""
+    question = instance.question
+    question.total_votes = question.total_votes - instance.votes_count
+    question.save()
