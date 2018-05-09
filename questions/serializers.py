@@ -26,13 +26,14 @@ class QuestionSerializer(serializers.ModelSerializer):
     """Serialize question model."""
 
     total_votes = serializers.ReadOnlyField()
+    id = serializers.ReadOnlyField()
     answers = AnswerSerializer(many=True)
 
     class Meta(object):
         """Meta settings for QuestionSerializer."""
 
         model = Question
-        fields = ('question', 'answers', 'total_votes')
+        fields = ('id', 'question', 'answers', 'total_votes')
 
     def create(self, validated_data):
         """Create question."""

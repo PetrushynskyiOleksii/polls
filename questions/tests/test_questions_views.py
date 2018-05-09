@@ -11,7 +11,7 @@ from questions.models import Question, Answer
 
 
 class QuestionListViewTest(TestCase):
-    """Test for ListView of question."""
+    """Test for API ListView of question."""
 
     def setUp(self):
         """Pre-populate test data."""
@@ -48,7 +48,7 @@ class QuestionListViewTest(TestCase):
                 self.assertIn(str(ans.votes_count), response_json)
 
 
-class QuestionCRDViewTest(TestCase):
+class QuestionCRUDViewsTest(TestCase):
     """Test for CRDView of question."""
 
     def setUp(self):
@@ -59,20 +59,19 @@ class QuestionCRDViewTest(TestCase):
         """Clean-up test data."""
         del self.client
 
-    def test_question_create_delete_retrieve(self):
+    def test_question_CRUD_views(self):
         """Test create question."""
+        # ----- Create -------
         data = {'question': 'test question',
                 'answers': [
                             {'answer': 'first answer'},
                             {'answer': 'second answer'}
                             ]
                 }
-
-        # ----- Create -------
         response = self.client.post('/question/create/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Question.objects.count(), 1)
-        quest = Question.objects.get(question='test question')
+        quest = Question.objects.get(id=int(response.data.get('id')))
         self.assertIsNotNone(quest)
         self.assertEqual(quest.total_votes, 0)
         self.assertEqual(Answer.objects.filter(question=quest).count(), 2)
