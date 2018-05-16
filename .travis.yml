@@ -1,14 +1,12 @@
 language: python
 python: 3.6
 cache: pip
-env:
-- SECRET_KEY=key
-
-
-before_install:
-- pip install -U pre-commit
-- pip install django==1.11
 
 script:
-- pre-commit run --all-files
 - python ./manage.py test
+
+jobs:
+  include:
+  - stage: pre-commit tests
+    script:
+    - pre-commit run --all-files
