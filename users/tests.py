@@ -49,7 +49,6 @@ class UserViewsTest(TestCase):
         response = self.client.post('/user/signup', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('username', response.data)
-        # How to proper test these serializers exeptions in response?
 
         # Invalid email
         data['email'] = 'invalid email'
