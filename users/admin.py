@@ -18,8 +18,8 @@ class UserAdmin(auth_admin.UserAdmin):
     """Class that represents users at admin page."""
 
     inlines = [UserProfileInline]
-    list_display = ('__str__', 'email', 'is_staff', 'is_active')
-    search_fields = ['__str__', 'email', 'is_staff', 'is_active']
+    list_display = ('username', 'email', 'is_staff', 'is_active')
+    search_fields = ['username', 'email', 'is_staff', 'is_active']
 
 
 admin.site.unregister(User)
