@@ -1,7 +1,7 @@
 """Models of questions' app."""
 
 from django.db import models
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 
@@ -48,9 +48,15 @@ class Answer(models.Model):
         return ('%s (%d)') % (self.answer, self.votes_count)
 
 
+@receiver(post_save, sender=Answer)
 @receiver(post_delete, sender=Answer)
 def update_total_votes(sender, instance, **kwargs):
     """Subtract votes count of removed answer from total count of votes."""
     question = instance.question
-    question.total_votes = question.total_votes - instance.votes_count
+    answers = Answer.objects.filter(question=question)
+    total_votes = 0
+    for ans in answers:
+        total_votes += ans.votes_count
+
+    question.total_votes = total_votes
     question.save()
