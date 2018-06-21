@@ -1,6 +1,7 @@
 """Models of questions' app."""
 
 from django.db import models
+from django.contrib.auth.models import User
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
@@ -18,6 +19,7 @@ class Question(models.Model):
                                 max_length=255)
     total_votes = models.IntegerField(verbose_name='Total Votes',
                                       default=0)
+    user = models.ForeignKey(User, verbose_name='Owner')
 
     def __str__(self):
         """Render the question instance as a string."""
