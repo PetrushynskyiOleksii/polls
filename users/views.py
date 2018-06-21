@@ -4,19 +4,15 @@ import jwt
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
 
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework_jwt.settings import api_settings
-from rest_framework.permissions import IsAuthenticated
 
 from .serializers import UserSerializer
 from main.settings import SECRET_KEY
-from questions.models import Answer, Question
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -67,29 +63,3 @@ class LoginUserView(APIView):
                      'status': 'failed'
                      }
             return Response(token, status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST', ])
-@permission_classes((IsAuthenticated, ))
-def votefor(request, quest, pk):
-    """Create a vote to the corresponding answer."""
-    user = request.user
-    try:
-        answer = Answer.objects.get(id=pk)
-        question = Question.objects.get(id=quest)
-    except ObjectDoesNotExist:
-        return Response({'status': 'failed',
-                         'detail': 'doesn\'t exist given answer or question'},
-                        status=status.HTTP_404_NOT_FOUND)
-
-    if question not in user.userprofile.voted_posts.all():
-        user.userprofile.voted_posts.add(question)
-        answer.votes_count += 1
-        answer.save()
-    else:
-        return Response({'status': 'failed',
-                         'detail': 'already voted'},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    return Response({'status': 'sucess'},
-                    status=status.HTTP_202_ACCEPTED)
