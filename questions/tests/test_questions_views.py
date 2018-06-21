@@ -3,6 +3,7 @@
 import json
 
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -16,11 +17,15 @@ class QuestionListViewTest(TestCase):
     def setUp(self):
         """Pre-populate test data."""
         self.client = APIClient()
-        self.test_first_quest = Question.objects.create(question='test first question')
+        self.testuser = User.objects.create(username='testuser',
+                                            email='testuser@gmail.com',
+                                            password='testpassword')
+        self.test_first_quest = Question.objects.create(question='test first question',
+                                                        user=self.testuser)
         self.test_second_quest = Question.objects.create(question='test second question',
-                                                         total_votes=2)
+                                                         total_votes=2, user=self.testuser)
         self.test_third_quest = Question.objects.create(question='test third question',
-                                                        total_votes=3)
+                                                        total_votes=3, user=self.testuser)
         self.test_first_answer = Answer.objects.create(question=self.test_first_quest,
                                                        answer='test first answer'
                                                        )
@@ -28,6 +33,7 @@ class QuestionListViewTest(TestCase):
     def tearDown(self):
         """Clean-up test data."""
         del self.client
+        del self.testuser
         del self.test_first_quest
         del self.test_second_quest
         del self.test_third_quest
@@ -61,6 +67,14 @@ class QuestionCRUDViewsTest(TestCase):
 
     def test_question_CRUD_views(self):
         """Test create question."""
+        user = {'username': 'testuser',
+                'email': 'testuser@email.com',
+                'password': 'testpassword'
+                }
+
+        response = self.client.post('/user/signup', user, format='json')
+        token = response.data.get('token')
+
         # ----- Create -------
         data = {'question': 'test question',
                 'answers': [
@@ -68,6 +82,11 @@ class QuestionCRUDViewsTest(TestCase):
                             {'answer': 'second answer'}
                             ]
                 }
+
+        response = self.client.post('/question/create/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + token)
         response = self.client.post('/question/create/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Question.objects.count(), 1)
@@ -77,6 +96,7 @@ class QuestionCRUDViewsTest(TestCase):
         self.assertEqual(Answer.objects.filter(question=quest).count(), 2)
         self.assertIsNotNone(Answer.objects.get(question=quest, answer='first answer'))
         self.assertIsNotNone(Answer.objects.get(question=quest, answer='second answer'))
+        self.assertEqual(User.objects.get(username='testuser').id, response.data.get('user'))
 
         data.pop('answers')
         response = self.client.post('/question/create/', data, format='json')
@@ -95,6 +115,22 @@ class QuestionCRUDViewsTest(TestCase):
         response = self.client.get('/question/100/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+        # Object-level permission
+        user = {'username': 'anotheruser',
+                'email': 'anotheruser@email.com',
+                'password': 'testpassword'
+                }
+
+        response = self.client.post('/user/signup', user, format='json')
+        bad_token = response.data.get('token')
+        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + bad_token)
+
+        response = self.client.delete('/question/{}/'.format(quest.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.put('/question/{}/'.format(quest.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         # ----- Update -------
         data = {'question': 'test update question',
                 'answers': [
@@ -103,6 +139,11 @@ class QuestionCRUDViewsTest(TestCase):
                             ],
                 }
 
+        self.client = APIClient()
+        response = self.client.put('/question/{}/'.format(quest.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + token)
         response = self.client.put('/question/{}/'.format(quest.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         quest = Question.objects.get(id=quest.id)
@@ -123,6 +164,11 @@ class QuestionCRUDViewsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # ----- Delete -------
+        self.client = APIClient()
+        response = self.client.put('/question/{}/'.format(quest.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + token)
         response = self.client.delete('/question/{}/'.format(quest.id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(Question.DoesNotExist):

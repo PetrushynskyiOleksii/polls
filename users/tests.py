@@ -77,12 +77,16 @@ class UserVoteTest(TestCase):
     def setUp(self):
         """Pre-populate test data."""
         self.client = APIClient()
-        self.test_quest = Question.objects.create(question='test question')
+        self.user = User.objects.create(username='user',
+                                        email='user@gmail.com',
+                                        password='password')
+        self.test_quest = Question.objects.create(question='test question', user=self.user)
         self.test_answer = Answer.objects.create(question=self.test_quest, answer='test answer')
 
     def tearDown(self):
         """Clean-up test data."""
         del self.client
+        del self.user
         del self.test_quest
         del self.test_answer
 
