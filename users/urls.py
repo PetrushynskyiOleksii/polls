@@ -3,7 +3,8 @@
 from django.conf.urls import url
 
 from .views import (CreateUserView,
-                    LoginUserView)
+                    LoginUserView
+                    )
 
 urlpatterns = [
     url(r'^signup', CreateUserView.as_view()),
