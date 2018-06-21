@@ -33,7 +33,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         """Meta settings for QuestionSerializer."""
 
         model = Question
-        fields = ('id', 'question', 'answers', 'total_votes')
+        fields = ('id', 'question', 'answers', 'total_votes', 'user')
 
     def create(self, validated_data):
         """Create question."""
