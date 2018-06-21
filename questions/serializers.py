@@ -1,4 +1,4 @@
-"""Serializer for users' models."""
+"""Serializer for answer&question models."""
 
 from rest_framework import serializers
 
@@ -6,7 +6,7 @@ from .models import Question, Answer
 
 
 class AnswerSerializer(serializers.ModelSerializer):
-    """Serialize answer model."""
+    """Serializer of answer model."""
 
     votes_count = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
@@ -18,12 +18,12 @@ class AnswerSerializer(serializers.ModelSerializer):
         fields = ('id', 'answer', 'votes_count')
 
     def create(self, validated_data):
-        """Create answer."""
+        """Create answer with validated data."""
         return Answer.objects.create(**validated_data)
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    """Serialize question model."""
+    """Serializer of question model."""
 
     total_votes = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
@@ -36,7 +36,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ('id', 'question', 'answers', 'total_votes', 'user')
 
     def create(self, validated_data):
-        """Create question."""
+        """Create question with validate data."""
         answers_data = validated_data.pop('answers')
         question = Question.objects.create(**validated_data)
         for answer_data in answers_data:
@@ -45,7 +45,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         return question
 
     def update(self, instance, validated_data):
-        """Update question."""
+        """Update data of question object."""
         instance.question = validated_data.get('question', instance.question)
         instance.save()
 
@@ -59,7 +59,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_answers(self, answers):
-        """Validate answers field before create question."""
+        """Validate count of answers before create question."""
         if len(answers) < 2:
             raise serializers.ValidationError('Require more then 2 answers.')
         return answers

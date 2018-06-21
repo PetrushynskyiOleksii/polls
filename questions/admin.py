@@ -1,6 +1,7 @@
 """Management admin panel of questions' app."""
 
 from django.contrib import admin
+
 from .models import Question, Answer
 
 
@@ -16,8 +17,8 @@ class QuestionAdmin(admin.ModelAdmin):
 
     inlines = [AnswerInline]
     list_display = ('id', 'question', 'total_votes', )
-    list_filter = ('total_votes',)
-    search_fields = ['id', ' question']
+    list_filter = ('total_votes', 'user', )
+    search_fields = ['id', ' question', 'user']
 
     class Meta:
         """Meta data of QuestionAdmin."""
@@ -33,7 +34,7 @@ class AnswerAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'answer', 'question', 'votes_count',)
     list_filter = ('question',)
-    search_fields = ['question', 'answer']
+    search_fields = ['id', 'question', 'answer']
 
     class Meta:
         """Meta data of AnswerAdmin."""

@@ -1,8 +1,8 @@
 """Management admin panel of users' app."""
 
 from django.contrib import admin
-from django.contrib.auth import admin as auth_admin
 from django.contrib.auth.models import User
+from django.contrib.auth import admin as auth_admin
 
 from .models import UserProfile
 
