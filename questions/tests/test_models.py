@@ -1,6 +1,7 @@
 """Tests for models of question app."""
 
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 from questions.models import Question, Answer
 
@@ -10,7 +11,11 @@ class QuestionAnswerModelTest(TestCase):
 
     def setUp(self):
         """Pre-populate test data."""
-        self.test_quest = Question.objects.create(question='test question')
+        self.testuser = User.objects.create(username='testuser',
+                                            email='testuser@gmail.com',
+                                            password='testpassword')
+        self.test_quest = Question.objects.create(question='test question',
+                                                  user=self.testuser)
         self.test_first_ans = Answer.objects.create(question=self.test_quest,
                                                     answer='first test answer')
         self.test_second_ans = Answer.objects.create(question=self.test_quest,
@@ -22,6 +27,7 @@ class QuestionAnswerModelTest(TestCase):
 
     def tearDown(self):
         """Clean-up test data."""
+        del self.testuser
         del self.test_quest
         del self.test_first_ans
         del self.test_second_ans
