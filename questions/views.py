@@ -1,8 +1,11 @@
 """Views for questions' app."""
 
+from django.contrib.auth.models import User
+
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from rest_framework.generics import (ListCreateAPIView,
+from rest_framework.generics import (ListAPIView,
                                      RetrieveUpdateDestroyAPIView,
                                      DestroyAPIView,
                                      CreateAPIView,
@@ -10,20 +13,41 @@ from rest_framework.generics import (ListCreateAPIView,
 
 from .models import Question, Answer
 from .serializers import QuestionSerializer, AnswerSerializer
+from .permissions import IsOwnerOrReadOnly
 
 
-class ListCreateQuestion(ListCreateAPIView):
-    """Create question, show all existing questions."""
+class QuestionList(ListAPIView):
+    """Show all existing questions."""
 
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
+
+
+class QuestionCreate(CreateAPIView):
+    """Create API view for Question model."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = QuestionSerializer
+
+    def create(self, request, **kwargs):
+        """Create question with given data."""
+        user = User.objects.get(username=request.user)
+        request.data['user'] = user.id
+        return super(QuestionCreate, self).create(request, **kwargs)
 
 
 class QuestionRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
-    """Retrive, destroy api of question object."""
+    """Retrive, destroy, update API of question object."""
 
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
     serializer_class = QuestionSerializer
     queryset = Question.objects.all()
+
+    def update(self, request, **kwargs):
+        """Update question with given data."""
+        user = User.objects.get(username=request.user)
+        request.data['user'] = user.id
+        return super(QuestionRetrieveUpdateDestroy, self).update(request, **kwargs)
 
 
 class AnswerDestroy(DestroyAPIView):
