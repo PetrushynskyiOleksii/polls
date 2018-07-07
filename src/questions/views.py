@@ -18,27 +18,38 @@ from .permissions import IsOwnerOrReadOnly
 
 
 class QuestionList(ListAPIView):
-    """Show all existing questions."""
+    """Return a list of all the existing questions."""
 
     queryset = Question.objects.all().order_by('user')
     serializer_class = QuestionSerializer
 
 
 class QuestionCreate(CreateAPIView):
-    """Create API view for Question model."""
+    """Create a new question instance."""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = QuestionSerializer
 
     def create(self, request, **kwargs):
-        """Create question with given data."""
+        """Create a new question instance."""
         user = User.objects.get(username=request.user)
         request.data['user'] = user.id
         return super(QuestionCreate, self).create(request, **kwargs)
 
 
 class QuestionRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
-    """Retrive, destroy, update API of question object."""
+    """
+    Question API for retrieve, update, destroy instance.
+
+    get:
+    Return the question instance which has id = `id`.
+
+    put:
+    Update the question instance which has id = `id`.
+
+    delete:
+    Destroy the question instance which has id = `id`.
+    """
 
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
     serializer_class = QuestionSerializer
