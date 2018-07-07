@@ -43,7 +43,7 @@ class QuestionListViewTest(TestCase):
         """Test list of questions."""
         response = self.client.get('/question/all/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), Question.objects.count())
+        self.assertEqual(len(response.data.get('results')), 3)
 
         response_json = json.dumps(response.data)
         for quest in Question.objects.all():
