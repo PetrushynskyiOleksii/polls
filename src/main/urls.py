@@ -1,20 +1,23 @@
 """Polls URL configuration."""
 
 from django.contrib import admin
-from django.conf.urls import url, include
+from django.conf.urls import include
+from django.urls import path
 
+from rest_framework.documentation import include_docs_urls
 from rest_framework_jwt.views import (obtain_jwt_token,
                                       verify_jwt_token,
                                       refresh_jwt_token
                                       )
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
+    path('api/', include_docs_urls(title='Votting app API')),
 
-    url(r'^api-token-auth/', obtain_jwt_token),
-    url(r'^api-token-refresh/', refresh_jwt_token),
-    url(r'^api-token-verify/', verify_jwt_token),
+    path('api-token-auth/', obtain_jwt_token),
+    path('api-token-refresh/', refresh_jwt_token),
+    path('api-token-verify/', verify_jwt_token),
 
-    url(r'^question/', include('questions.urls')),
-    url(r'^user/', include('users.urls')),
+    path('question/', include('questions.urls')),
+    path('user/', include('users.urls')),
 ]
