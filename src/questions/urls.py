@@ -1,6 +1,6 @@
 """Questions' URL Configuration."""
 
-from django.conf.urls import url
+from django.urls import path
 from .views import (QuestionList,
                     QuestionCreate,
                     QuestionRetrieveUpdateDestroy,
@@ -8,8 +8,8 @@ from .views import (QuestionList,
                     )
 
 urlpatterns = [
-    url(r'^all/$', QuestionList.as_view()),
-    url(r'^create/$', QuestionCreate.as_view()),
-    url(r'^(?P<pk>[0-9]+)/$', QuestionRetrieveUpdateDestroy.as_view()),
-    url(r'^(?P<quest>[0-9]+)/votefor/(?P<pk>[0-9]+)/$', votefor),
+    path('all/', QuestionList.as_view()),
+    path('create/', QuestionCreate.as_view()),
+    path('<int:pk>/', QuestionRetrieveUpdateDestroy.as_view()),
+    path('<int:quest>/votefor/<int:pk>/', votefor),
 ]
