@@ -9,30 +9,29 @@ from questions.models import Question
 
 
 class UserProfile(models.Model):
-    """Extra user data."""
+    """Extra user data (profile)."""
 
     class Meta(object):
-        """Meta data for user profile."""
+        """Meta settings for user profile."""
 
-        verbose_name = u'User Profile'
+        verbose_name = 'User Profile'
 
-    user = models.OneToOneField(User)
-    voted_posts = models.ManyToManyField(Question,
-                                         verbose_name=u'Voted questions')
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    voted_posts = models.ManyToManyField(Question, verbose_name='Voted questions')
 
     def __str__(self):
-        """Render the user instance as a string."""
+        """Return the profile instance as a string."""
         return self.user.username
 
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    """Create user profile after create user."""
+    """Create profile for new user."""
     if created:
         UserProfile.objects.create(user=instance)
 
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    """Save user profile."""
+    """Update profile after signal from user model."""
     instance.userprofile.save()
