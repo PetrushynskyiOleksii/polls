@@ -1,5 +1,6 @@
 """Serializer for answer&question models."""
 
+from django.db import transaction
 from rest_framework import serializers
 
 from .models import Question, Answer
@@ -38,9 +39,11 @@ class QuestionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Create question with validate data."""
         answers_data = validated_data.pop('answers')
-        question = Question.objects.create(**validated_data)
-        for answer_data in answers_data:
-            Answer.objects.create(question=question, **answer_data)
+
+        with transaction.atomic():
+            question = Question.objects.create(**validated_data)
+            for answer_data in answers_data:
+                Answer.objects.create(question=question, **answer_data)
 
         return question
 
