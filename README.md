@@ -18,6 +18,6 @@ Voting app.
    4. Install project requirements.
       - Base: `$ pip install -r requirements.txt`
       - Dev: `$ pip install -r requirements-dev.txt`
-   5. Run migrate : `python manage.py migrate`
-   6. Run server : `python manage.py runserver`
-   7. Create superuser for admin page : `python manage.py createsuperuser`
+   5. Run migrate : `python ./src/manage.py migrate`
+   6. Run server : `python ./src/manage.py runserver`
+   7. Create superuser for admin page : `python ./src/manage.py createsuperuser`
