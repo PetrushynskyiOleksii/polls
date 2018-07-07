@@ -20,7 +20,7 @@ from .permissions import IsOwnerOrReadOnly
 class QuestionList(ListAPIView):
     """Show all existing questions."""
 
-    queryset = Question.objects.all()
+    queryset = Question.objects.all().order_by('user')
     serializer_class = QuestionSerializer
 
 
