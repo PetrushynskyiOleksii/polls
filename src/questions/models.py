@@ -40,7 +40,7 @@ class Answer(models.Model):
 
     def __str__(self):
         """Render the answer instance as a string."""
-        return f'{self.answer}({self.votes_count})'
+        return f'{self.answer} ({self.votes_count})'
 
 
 @receiver(post_save, sender=Answer)
