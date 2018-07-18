@@ -18,10 +18,6 @@ class AnswerSerializer(serializers.ModelSerializer):
         model = Answer
         fields = ('id', 'answer', 'votes_count')
 
-    def create(self, validated_data):
-        """Create answer with validated data."""
-        return Answer.objects.create(**validated_data)
-
 
 class QuestionSerializer(serializers.ModelSerializer):
     """Serializer of question model."""
