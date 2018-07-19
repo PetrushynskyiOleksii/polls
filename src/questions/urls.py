@@ -8,7 +8,7 @@ router = routers.SimpleRouter()
 router.register(r'', QuestionViewSet)
 
 urlpatterns = [
-    path('<int:quest>/votefor/<int:pk>/', votefor),
+    path('<int:question_pk>/votefor/<int:answer_pk>/', votefor),
 ]
 
 urlpatterns += router.urls

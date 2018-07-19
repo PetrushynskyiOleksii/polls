@@ -63,12 +63,12 @@ class QuestionViewSet(ModelViewSet):
 
 @api_view(['POST', ])
 @permission_classes((IsAuthenticated, ))
-def votefor(request, quest, pk):
+def votefor(request, question_pk, answer_pk):
     """Create a vote to the corresponding answer."""
     user = request.user
     try:
-        answer = Answer.objects.get(id=pk)
-        question = Question.objects.get(id=quest)
+        answer = Answer.objects.get(id=answer_pk)
+        question = Question.objects.get(id=question_pk)
     except ObjectDoesNotExist:
         return Response({'status': 'failed',
                          'detail': 'doesn\'t exist given answer or question'},
