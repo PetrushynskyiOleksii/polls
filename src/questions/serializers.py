@@ -9,21 +9,18 @@ from .models import Question, Answer
 class AnswerSerializer(serializers.ModelSerializer):
     """Serializer of answer model."""
 
-    votes_count = serializers.ReadOnlyField()
-    id = serializers.ReadOnlyField()
-
     class Meta(object):
         """Meta settings for AnswerSerializer."""
 
         model = Answer
         fields = ('id', 'answer', 'votes_count')
+        read_only_fields = ('votes_count', 'id',)
 
 
 class QuestionSerializer(serializers.ModelSerializer):
     """Serializer of question model."""
 
-    total_votes = serializers.ReadOnlyField()
-    id = serializers.ReadOnlyField()
+    user = serializers.StringRelatedField()
     answers = AnswerSerializer(many=True)
 
     class Meta(object):
@@ -31,6 +28,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
         model = Question
         fields = ('id', 'question', 'answers', 'total_votes', 'user')
+        read_only_fields = ('id', 'total_votes', )
 
     def create(self, validated_data):
         """Create question with validate data."""
