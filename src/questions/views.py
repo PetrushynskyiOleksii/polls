@@ -1,67 +1,64 @@
 """Views for questions' app."""
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.models import User
 
 from rest_framework import status
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.generics import (ListAPIView,
-                                     RetrieveUpdateDestroyAPIView,
-                                     CreateAPIView,
-                                     )
+from rest_framework.viewsets import ModelViewSet
 
 from .models import Question, Answer
 from .serializers import QuestionSerializer
 from .permissions import IsOwnerOrReadOnly
 
 
-class QuestionList(ListAPIView):
-    """Return a list of all the existing questions."""
-
-    queryset = Question.objects.all().order_by('user')
-    serializer_class = QuestionSerializer
-    filter_backends = (OrderingFilter,)
-
-
-class QuestionCreate(CreateAPIView):
-    """Create a new question instance."""
-
-    permission_classes = (IsAuthenticated,)
-    serializer_class = QuestionSerializer
-
-    def create(self, request, **kwargs):
-        """Create a new question instance."""
-        user = User.objects.get(username=request.user)
-        request.data['user'] = user.id
-        return super(QuestionCreate, self).create(request, **kwargs)
-
-
-class QuestionRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
+class QuestionViewSet(ModelViewSet):
     """
-    Question API for retrieve, update, destroy instance.
+    Question's view set.
 
-    get:
+    list:
+    Return list of all existing questions.
+
+    create:
+    Create a new question instance.
+
+    retrieve:
     Return the question instance which has id = `id`.
 
-    put:
+    update:
     Update the question instance which has id = `id`.
 
-    delete:
+    destroy:
     Destroy the question instance which has id = `id`.
     """
 
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
     serializer_class = QuestionSerializer
     queryset = Question.objects.all()
+    filter_backends = (OrderingFilter,)
+    ordering = ('-total_votes',)
 
-    def update(self, request, **kwargs):
+    def get_permissions(self):
+        """Instantiate and return the list of permissions."""
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        elif self.action == 'create':
+            permission_classes = [IsAuthenticated]
+        elif self.action in ['destroy', 'update']:
+            permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+        else:
+            permission_classes = [IsAdminUser]
+
+        return [permission() for permission in permission_classes]
+
+    def perform_create(self, serializer):
+        """Create a new question instance."""
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
         """Update question with given data."""
-        user = User.objects.get(username=request.user)
-        request.data['user'] = user.id
-        return super(QuestionRetrieveUpdateDestroy, self).update(request, **kwargs)
+        serializer.save(user=self.request.user)
 
 
 @api_view(['POST', ])

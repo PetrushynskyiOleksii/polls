@@ -41,7 +41,7 @@ class QuestionListViewTest(TestCase):
 
     def test_questions_list(self):
         """Test list of questions."""
-        response = self.client.get('/question/all/')
+        response = self.client.get('/question/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data.get('results')), 3)
 
@@ -83,11 +83,11 @@ class QuestionCRUDViewsTest(TestCase):
                             ]
                 }
 
-        response = self.client.post('/question/create/', data, format='json')
+        response = self.client.post('/question/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         self.client.credentials(HTTP_AUTHORIZATION='JWT ' + token)
-        response = self.client.post('/question/create/', data, format='json')
+        response = self.client.post('/question/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Question.objects.count(), 1)
         quest = Question.objects.get(id=int(response.data.get('id')))
@@ -96,10 +96,10 @@ class QuestionCRUDViewsTest(TestCase):
         self.assertEqual(Answer.objects.filter(question=quest).count(), 2)
         self.assertIsNotNone(Answer.objects.get(question=quest, answer='first answer'))
         self.assertIsNotNone(Answer.objects.get(question=quest, answer='second answer'))
-        self.assertEqual(User.objects.get(username='testuser').id, response.data.get('user'))
+        self.assertEqual(str(User.objects.get(username='testuser')), response.data.get('user'))
 
         data.pop('answers')
-        response = self.client.post('/question/create/', data, format='json')
+        response = self.client.post('/question/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # ----- Retrieve -----
