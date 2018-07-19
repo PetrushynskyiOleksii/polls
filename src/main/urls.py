@@ -12,7 +12,7 @@ from rest_framework_jwt.views import (obtain_jwt_token,
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include_docs_urls(title='Votting app API')),
+    path('api/', include_docs_urls(title='API of vote app.')),
 
     path('api-token-auth/', obtain_jwt_token),
     path('api-token-refresh/', refresh_jwt_token),
