@@ -9,12 +9,21 @@ from .models import Question, Answer
 class AnswerSerializer(serializers.ModelSerializer):
     """Serializer of answer model."""
 
+    vote_url = serializers.SerializerMethodField()
+
     class Meta(object):
         """Meta settings for AnswerSerializer."""
 
         model = Answer
-        fields = ('id', 'answer', 'votes_count')
+        fields = ('id', 'answer', 'votes_count', 'vote_url')
         read_only_fields = ('votes_count', 'id',)
+
+    def get_vote_url(self, obj):
+        """Return URL that represent vote for answer."""
+        request = self.context.get('request')
+        url = f'http://{request.get_host()}/question/{obj.question.id}/votefor/{obj.id}/'
+
+        return url
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -42,21 +51,43 @@ class QuestionSerializer(serializers.ModelSerializer):
         return question
 
     def update(self, instance, validated_data):
-        """Update data of question object."""
-        instance.question = validated_data.get('question', instance.question)
-        instance.save()
-
+        """Update data of question and answers objects."""
         question = Question.objects.get(id=instance.id)
-        Answer.objects.filter(question=question).delete()
 
-        answers_data = validated_data.pop('answers')
-        for answer_data in answers_data:
-            Answer.objects.create(question=question, **answer_data)
+        if 'answers' in validated_data:
+            answer_ids_new = []
+            answer_ids_pre = instance.answers.all().values_list('id', flat=True)
+
+            # Perform create
+            with transaction.atomic():
+                for answer in validated_data.pop('answers'):
+                    ans, _created = Answer.objects.get_or_create(question=question, **answer)
+                    ans.question = instance
+                    ans.save()
+                    answer_ids_new.append(ans.id)
+
+            # Perform delete
+            delete_ids = set(answer_ids_pre) - set(answer_ids_new)
+            Answer.objects.filter(id__in=delete_ids).delete()
+
+        for item, value in validated_data.items():
+            setattr(instance, item, value)
+
+        instance.save()
 
         return instance
 
     def validate_answers(self, answers):
-        """Validate count of answers before create question."""
+        """Validate count/duplicates of answers before create question."""
+        # Check count of answers
         if len(answers) < 2:
             raise serializers.ValidationError('Require more then 2 answers.')
+
+        # Check for duplicates
+        ans_list = []
+        for ans in answers:
+            ans_list.append(ans.get('answer'))
+        if len(ans_list) > len(set(ans_list)):
+            raise serializers.ValidationError('Duplicates are not allowed.')
+
         return answers

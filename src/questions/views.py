@@ -4,13 +4,14 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework import status
 from rest_framework.filters import OrderingFilter
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
 from .models import Question, Answer
-from .serializers import QuestionSerializer
+from .serializers import QuestionSerializer, AnswerSerializer
 from .permissions import IsOwnerOrReadOnly
 
 
@@ -29,6 +30,9 @@ class QuestionViewSet(ModelViewSet):
 
     update:
     Update the question instance which has id = `id`.
+    This way of update answers invoke creating new instances,
+    as a result of which will be a new id and votes_count field
+    for answers will be nullified.
 
     destroy:
     Destroy the question instance which has id = `id`.
@@ -59,6 +63,25 @@ class QuestionViewSet(ModelViewSet):
     def perform_update(self, serializer):
         """Update question with given data."""
         serializer.save(user=self.request.user)
+
+
+class AnswerViewSet(RetrieveUpdateDestroyAPIView, GenericViewSet):
+    """
+    Answer's view set.
+
+    retrieve:
+    Return the answer instance which has id = `id`.
+
+    update:
+    Update the question instance which has id = `id`.
+
+    destroy:
+    Destroy the question instance which has id = `id`.
+    """
+
+    serializer_class = AnswerSerializer
+    queryset = Answer.objects.all()
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
 
 @api_view(['POST', ])

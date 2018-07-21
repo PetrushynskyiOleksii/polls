@@ -15,7 +15,7 @@ class Question(models.Model):
         verbose_name = 'Question'
         verbose_name_plural = 'Questions'
 
-    question = models.CharField(verbose_name='Question', max_length=255)
+    question = models.CharField(verbose_name='Question', max_length=255, unique=True)
     total_votes = models.IntegerField(verbose_name='Total Votes', default=0)
     user = models.ForeignKey(User, verbose_name='Owner', on_delete=models.CASCADE)
 
@@ -32,6 +32,7 @@ class Answer(models.Model):
 
         verbose_name = 'Answer'
         verbose_name_plural = 'Answers'
+        unique_together = ('question', 'answer',)
 
     question = models.ForeignKey(Question, verbose_name='Question', related_name='answers',
                                  on_delete=models.CASCADE)
