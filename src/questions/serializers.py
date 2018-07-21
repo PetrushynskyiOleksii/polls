@@ -9,12 +9,21 @@ from .models import Question, Answer
 class AnswerSerializer(serializers.ModelSerializer):
     """Serializer of answer model."""
 
+    vote_url = serializers.SerializerMethodField()
+
     class Meta(object):
         """Meta settings for AnswerSerializer."""
 
         model = Answer
-        fields = ('id', 'answer', 'votes_count')
+        fields = ('id', 'answer', 'votes_count', 'vote_url')
         read_only_fields = ('votes_count', 'id',)
+
+    def get_vote_url(self, obj):
+        """Return URL that represent vote for answer."""
+        request = self.context.get('request')
+        url = f'http://{request.get_host()}/question/{obj.question.id}/votefor/{obj.id}/'
+
+        return url
 
 
 class QuestionSerializer(serializers.ModelSerializer):
