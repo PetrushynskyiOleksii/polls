@@ -81,7 +81,7 @@ class AnswerViewSet(RetrieveUpdateDestroyAPIView, GenericViewSet):
 
     serializer_class = AnswerSerializer
     queryset = Answer.objects.all()
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
 
 @api_view(['POST', ])
