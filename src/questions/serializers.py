@@ -59,11 +59,12 @@ class QuestionSerializer(serializers.ModelSerializer):
             answer_ids_pre = instance.answers.all().values_list('id', flat=True)
 
             # Perform create
-            for answer in validated_data.pop('answers'):
-                ans, _created = Answer.objects.get_or_create(question=question, **answer)
-                ans.question = instance
-                ans.save()
-                answer_ids_new.append(ans.id)
+            with transaction.atomic():
+                for answer in validated_data.pop('answers'):
+                    ans, _created = Answer.objects.get_or_create(question=question, **answer)
+                    ans.question = instance
+                    ans.save()
+                    answer_ids_new.append(ans.id)
 
             # Perform delete
             delete_ids = set(answer_ids_pre) - set(answer_ids_new)
@@ -77,7 +78,16 @@ class QuestionSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_answers(self, answers):
-        """Validate count of answers before create question."""
+        """Validate count/duplicates of answers before create question."""
+        # Check count of answers
         if len(answers) < 2:
             raise serializers.ValidationError('Require more then 2 answers.')
+
+        # Check for duplicates
+        ans_list = []
+        for ans in answers:
+            ans_list.append(ans.get('answer'))
+        if len(ans_list) > len(set(ans_list)):
+            raise serializers.ValidationError('Duplicates are not allowed.')
+
         return answers
