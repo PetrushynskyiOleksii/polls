@@ -12,6 +12,7 @@ class AnswerInline(admin.TabularInline):
     extra = 0
 
 
+@admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     """Class that represents question at admin page."""
 
@@ -20,26 +21,11 @@ class QuestionAdmin(admin.ModelAdmin):
     list_filter = ('total_votes', 'user', )
     search_fields = ['id', ' question', 'user']
 
-    class Meta:
-        """Meta data of QuestionAdmin."""
 
-        model = Question
-
-
-admin.site.register(Question, QuestionAdmin)
-
-
+@admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
     """Class that represents answer at admin page."""
 
     list_display = ('id', 'answer', 'question', 'votes_count',)
     list_filter = ('question',)
     search_fields = ['id', 'question', 'answer']
-
-    class Meta:
-        """Meta data of AnswerAdmin."""
-
-        model = Answer
-
-
-admin.site.register(Answer, AnswerAdmin)
