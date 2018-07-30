@@ -6,11 +6,13 @@ before_install:
 - pip install -r requirements.txt
 - pip install -r requirements-dev.txt
 
-script:
-- python ./src/manage.py test
 
 jobs:
   include:
   - stage: pre-commit tests
     script:
     - pre-commit run --all-files
+
+  - stage: django tests
+    script:
+    - python src/manage.py test questions users
