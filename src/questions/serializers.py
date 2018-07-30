@@ -16,7 +16,7 @@ class AnswerSerializer(serializers.ModelSerializer):
 
         model = Answer
         fields = ('id', 'answer', 'votes_count', 'vote_url')
-        read_only_fields = ('votes_count', 'id',)
+        read_only_fields = ('votes_count',)
 
     def get_vote_url(self, obj):
         """Return URL that represent vote for answer."""
@@ -37,7 +37,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
         model = Question
         fields = ('id', 'question', 'answers', 'total_votes', 'user')
-        read_only_fields = ('id', 'total_votes', )
+        read_only_fields = ('total_votes', )
 
     def create(self, validated_data):
         """Create question with validate data."""
