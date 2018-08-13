@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: polls_db
+    env_file:
+      - ./src/main/.env
+    volumes:
+      - ./scripts/postgres:/docker-entrypoint-initdb.d
+
+  polls:
+    build: .
+    container_name: polls
+
+    volumes:
+      - .:/code
+    env_file:
+      - ./src/main/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    command: ./scripts/wait_for_it.sh
+
+  # TODO: redis
+  #redis:
+  #  restart: always
+  #  image: redis:latest
+  #  expose:
+  #    - "6379"
