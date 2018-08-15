@@ -18,8 +18,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
     inlines = [AnswerInline]
     list_display = ('id', 'question', 'total_votes', )
-    list_filter = ('total_votes', 'user', )
-    search_fields = ['id', ' question', 'user']
+    search_fields = ['id', 'question']
 
 
 @admin.register(Answer)

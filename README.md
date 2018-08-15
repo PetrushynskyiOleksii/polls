@@ -19,6 +19,7 @@ Voting app.
 | POST   | /users/login/                                | Authenticate a user and return token            |
 | GET    | /question/                                   | Return list of all existing questions           |
 | POST   | /question/                                   | Create a new question's instance                |
+| GET    | /question/top/                               | Return top 10 popular questions                 |
 | GET    | /question/{pk}/                              | Retrieve question's instance                    |
 | PUT    | /question/{pk}/                              | Update question's instance (*Look note bellow*) |
 | DELETE | /question/{pk}/                              | Delete question's instance                      |
@@ -38,10 +39,10 @@ id and vote_count will nullified. **Strongly recommended** to use endpoint for u
 2. Create a file `touch src/main/.env` with following variables like as::
     ```bash
        DB_NAME=pollsdb
-       USER=pollsuser
-       PASSWORD=pollspassword
-       HOST=postgres
-       PORT=5432
+       DB_USER=pollsuser
+       DB_PASSWORD=pollspassword
+       PG_HOST=postgres
+       PG_PORT=5432
        SECRET_KEY=secretdjangokey
     ```
 3. Run docker-compose: `$ docker-compose up -d`

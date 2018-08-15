@@ -1,10 +1,14 @@
 """Views for questions' app."""
 
+from django.conf import settings
+from django.core.cache import cache
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 
 from rest_framework import status
 from rest_framework.filters import OrderingFilter
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
@@ -13,6 +17,8 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from .models import Question, Answer
 from .serializers import QuestionSerializer, AnswerSerializer
 from .permissions import IsOwnerOrReadOnly
+
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 
 class QuestionViewSet(ModelViewSet):
@@ -39,7 +45,7 @@ class QuestionViewSet(ModelViewSet):
     """
 
     serializer_class = QuestionSerializer
-    queryset = Question.objects.all()
+    queryset = Question.objects.all_with_prefetch_answers()
     filter_backends = (OrderingFilter,)
     ordering = ('-total_votes',)
 
@@ -63,6 +69,23 @@ class QuestionViewSet(ModelViewSet):
     def perform_update(self, serializer):
         """Update question with given data."""
         serializer.save(user=self.request.user)
+
+
+class TopQuestions(ListAPIView):
+    """Top list questions view."""
+
+    serializer_class = QuestionSerializer
+
+    def get_queryset(self):
+        """Return cached queryset of top popular questions."""
+        key = 'top_questions'
+        if key in cache:
+            qs = cache.get(key)
+        else:
+            qs = Question.objects.top_questions()
+            cache.set(key, qs, timeout=CACHE_TTL)
+
+        return qs
 
 
 class AnswerViewSet(RetrieveUpdateDestroyAPIView, GenericViewSet):
@@ -90,17 +113,16 @@ def votefor(request, question_pk, answer_pk):
     """Create a vote to the corresponding answer."""
     user = request.user
     try:
-        answer = Answer.objects.get(id=answer_pk)
         question = Question.objects.get(id=question_pk)
+        answer = Answer.objects.get(id=answer_pk)
     except ObjectDoesNotExist:
         return Response({'status': 'failed',
                          'detail': 'doesn\'t exist given answer or question'},
                         status=status.HTTP_404_NOT_FOUND)
-
     if question not in user.userprofile.voted_posts.all():
         user.userprofile.voted_posts.add(question)
-        answer.votes_count += 1
-        answer.save()
+        answer.votes_count += F('votes_count') + 1
+        answer.save(updated_fields=('votes_count'))
     else:
         return Response({'status': 'failed',
                          'detail': 'already voted'},

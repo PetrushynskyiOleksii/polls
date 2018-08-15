@@ -21,7 +21,7 @@ class AnswerSerializer(serializers.ModelSerializer):
     def get_vote_url(self, obj):
         """Return URL that represent vote for answer."""
         request = self.context.get('request')
-        url = f'http://{request.get_host()}/question/{obj.question.id}/votefor/{obj.id}/'
+        url = f'http://{request.get_host()}/question/{obj.question_id}/votefor/{obj.id}/'
 
         return url
 
