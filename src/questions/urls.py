@@ -2,14 +2,15 @@
 
 from django.urls import path
 from rest_framework import routers
-from .views import QuestionViewSet, votefor, AnswerViewSet
+from . import views
 
 router = routers.SimpleRouter()
-router.register(r'', QuestionViewSet)
-router.register(r'(?P<question_pk>\d+)', AnswerViewSet)
+router.register(r'', views.QuestionViewSet)
+router.register(r'(?P<question_pk>\d+)', views.AnswerViewSet)
 
 urlpatterns = [
-    path('<int:question_pk>/votefor/<int:answer_pk>/', votefor),
+    path('top/', views.TopQuestions.as_view()),
+    path('<int:question_pk>/votefor/<int:answer_pk>/', views.votefor),
 ]
 
 urlpatterns += router.urls

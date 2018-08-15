@@ -34,7 +34,7 @@ class AnswerSignalsTest(TestCase):
         answer.delete()
         question = Question.objects.get(id=self.test_question.id)
         self.assertNotEqual(total_votes, question.total_votes)
-        self.assertEqual(question.total_votes, total_votes - self.test_answer.votes_count)
+        self.assertEqual(question.total_votes, None)
 
     def test_post_save_signal(self):
         """Test total votes of question after vote for answer."""
