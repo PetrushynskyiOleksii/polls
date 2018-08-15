@@ -10,9 +10,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'dm*%y4#(w1e+xf)vykokew^&(z6hgsd9^ppw(um5#r5-*ez_84'
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', 'some_secret')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -72,11 +71,11 @@ WSGI_APPLICATION = 'main.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('USER'),
-        'PASSWORD': os.getenv('PASSWORD'),
-        'HOST': os.getenv('HOST'),
-        'PORT': os.getenv('PORT'),
+        'NAME': os.getenv('DB_NAME', 'pollsdb'),
+        'USER': os.getenv('DB_USER', 'pollsuser'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'pollspassword'),
+        'HOST': os.getenv('PG_HOST', '127.0.0.1'),
+        'PORT': os.getenv('PG_PORT', 5432),
     }
 }
 
