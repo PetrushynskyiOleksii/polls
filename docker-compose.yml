@@ -13,7 +13,6 @@ services:
   polls:
     build: .
     container_name: polls
-
     volumes:
       - .:/code
     env_file:
@@ -22,11 +21,12 @@ services:
       - "8000:8000"
     depends_on:
       - postgres
+      - redis
     command: ./scripts/wait_for_it.sh
 
-  # TODO: redis
-  #redis:
-  #  restart: always
-  #  image: redis:latest
-  #  expose:
-  #    - "6379"
+  redis:
+    restart: always
+    image: redis:3.2.0
+    container_name: polls_cache
+    expose:
+      - "6379"
