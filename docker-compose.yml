@@ -6,7 +6,7 @@ services:
     image: postgres:latest
     container_name: polls_db
     env_file:
-      - ./src/main/.env
+      - src/main/.env
     volumes:
       - ./scripts/postgres:/docker-entrypoint-initdb.d
 
@@ -16,7 +16,7 @@ services:
     volumes:
       - .:/code
     env_file:
-      - ./src/main/.env
+      - src/main/.env
     ports:
       - "8000:8000"
     depends_on:
