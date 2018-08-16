@@ -82,9 +82,10 @@ class Answer(models.Model):
 
 @receiver(post_save, sender=Answer)
 @receiver(post_delete, sender=Answer)
-def update_total_votes(sender, instance, **kwargs):
+def update_total_votes(sender, instance, created=False, **kwargs):
     """Update total votes of question after signals."""
-    question = instance.question
-    question_answers = sender.objects.filter(question=question).aggregate(total_votes=Sum('votes_count'))
-    question.total_votes = question_answers.get('total_votes', 0)
-    question.save(update_fields=('total_votes',))
+    if not created:
+        question = instance.question
+        question_answers = sender.objects.filter(question=question).aggregate(total_votes=Sum('votes_count'))
+        question.total_votes = question_answers.get('total_votes', 0)
+        question.save(update_fields=('total_votes',))
