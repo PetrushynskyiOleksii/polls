@@ -52,18 +52,14 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Update data of question and answers objects."""
-        question = Question.objects.get(id=instance.id)
-
         if 'answers' in validated_data:
             answer_ids_new = []
-            answer_ids_pre = instance.answers.all().values_list('id', flat=True)
+            answer_ids_pre = instance.answers.values_list('id', flat=True)
 
             # Perform create
             with transaction.atomic():
                 for answer in validated_data.pop('answers'):
-                    ans, _created = Answer.objects.get_or_create(question=question, **answer)
-                    ans.question = instance
-                    ans.save()
+                    ans, _ = Answer.objects.get_or_create(question=instance, **answer)
                     answer_ids_new.append(ans.id)
 
             # Perform delete
