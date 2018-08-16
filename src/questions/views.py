@@ -113,14 +113,13 @@ def votefor(request, question_pk, answer_pk):
     """Create a vote to the corresponding answer."""
     user = request.user
     try:
-        question = Question.objects.get(id=question_pk)
-        answer = Answer.objects.get(id=answer_pk)
+        answer = Answer.objects.get(question_id=question_pk, id=answer_pk)
     except ObjectDoesNotExist:
         return Response({'status': 'failed',
                          'detail': 'doesn\'t exist given answer or question'},
                         status=status.HTTP_404_NOT_FOUND)
-    if question not in user.userprofile.voted_posts.all():
-        user.userprofile.voted_posts.add(question)
+    if question_pk not in user.userprofile.voted_posts.values_list('id', flat=True):
+        user.userprofile.voted_posts.add(question_pk)
         answer.votes_count += F('votes_count') + 1
         answer.save(update_fields=('votes_count', ))
     else:
@@ -128,5 +127,5 @@ def votefor(request, question_pk, answer_pk):
                          'detail': 'already voted'},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({'status': 'sucess'},
+    return Response({'status': 'success'},
                     status=status.HTTP_202_ACCEPTED)
