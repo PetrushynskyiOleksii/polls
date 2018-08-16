@@ -45,7 +45,7 @@ class QuestionViewSet(ModelViewSet):
     """
 
     serializer_class = QuestionSerializer
-    queryset = Question.objects.all_with_prefetch_answers()
+    queryset = Question.objects.all_with_related_fields()
     filter_backends = (OrderingFilter,)
     ordering = ('-total_votes',)
 
@@ -103,7 +103,7 @@ class AnswerViewSet(RetrieveUpdateDestroyAPIView, GenericViewSet):
     """
 
     serializer_class = AnswerSerializer
-    queryset = Answer.objects.all()
+    queryset = Answer.objects.all_with_related_question_owner()
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
 
@@ -122,7 +122,7 @@ def votefor(request, question_pk, answer_pk):
     if question not in user.userprofile.voted_posts.all():
         user.userprofile.voted_posts.add(question)
         answer.votes_count += F('votes_count') + 1
-        answer.save(updated_fields=('votes_count'))
+        answer.save(update_fields=('votes_count', ))
     else:
         return Response({'status': 'failed',
                          'detail': 'already voted'},

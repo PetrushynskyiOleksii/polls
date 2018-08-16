@@ -10,16 +10,18 @@ from django.db.models.signals import post_delete, post_save
 class QuestionManager(models.Manager):
     """Custom manager for question model."""
 
-    def all_with_prefetch_answers(self):
-        """Query questions with related answers and user information."""
-        qs = Question.objects.select_related('user').only('user__username', 'question', 'total_votes')
+    def all_with_related_fields(self):
+        """Query questions with related fields."""
+        qs = Question.objects.select_related('user').only(
+            'user__username', 'question', 'total_votes'
+        )
         qs = qs.prefetch_related('answers')
 
         return qs
 
     def top_questions(self, limit=10):
         """Return top [limit] popular questions."""
-        qs = Question.objects.all_with_prefetch_answers()
+        qs = Question.objects.all_with_related_fields()
         qs = qs.order_by('-total_votes')[:limit]
 
         return qs
@@ -45,6 +47,17 @@ class Question(models.Model):
         return self.question
 
 
+class AnswerManager(models.Manager):
+    """Custom manager for answer model."""
+
+    def all_with_related_question_owner(self):
+        """Query answers with all related fields."""
+        qs = Answer.objects.select_related('question__user').only(
+            'answer', 'votes_count', 'question__user'
+        )
+        return qs
+
+
 class Answer(models.Model):
     """Model that represents answer information."""
 
@@ -59,6 +72,8 @@ class Answer(models.Model):
                                  on_delete=models.CASCADE)
     answer = models.CharField(verbose_name='Answer', blank=True, max_length=255)
     votes_count = models.IntegerField(verbose_name='Count of Votes', default=0)
+
+    objects = AnswerManager()
 
     def __str__(self):
         """Render the answer instance as a string."""
