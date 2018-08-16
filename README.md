@@ -46,7 +46,7 @@ id and vote_count will nullified. **Strongly recommended** to use endpoint for u
        SECRET_KEY=secretdjangokey
     ```
 3. Run docker-compose: `$ docker-compose up -d`
-4. API documentation: `http://localhost:8000/api/
+4. API documentation endpoint: `http://localhost:8000/api/`
 
 - Create super user: `$ docker exec -ti polls python ./src/manage.py createsuperuser `
 - For shell accessing: `$ docker exec -ti <container> bash`
